@@ -1,3 +1,4 @@
+[![T0_P7](https://img.youtube.com/vi/RnU4nXGxDlc/0.jpg)](https://www.youtube.com/watch?v=RnU4nXGxDlc)
 ###  How to get a free SSL certificate with let's encrypt | VPS Beginner | P7
 
 **Log to VPS using putty and your SSH key**
