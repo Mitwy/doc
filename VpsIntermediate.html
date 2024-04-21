@@ -1,0 +1,183 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>VPS Intermediate</title>
+  <meta name="Mitwy" content="VPS Intermediate">
+  <link rel="stylesheet" href="css/air.css">
+</head>
+<body>
+
+<h3 id="T0_P0">How to backup your WordPress database and files | VPS Intermediate | P0</h3>
+<p>Create new git user on Gogs for backups</p>
+<p>Create a git repo for your shop on your VPS</p>
+<p>Save git credential to store (to not have to type it), it will be save on next push</p>
+<pre><code><span class="hljs-meta"># https:<span class="hljs-comment">//git-scm.com/docs/git-credential-store</span></span>
+git <span class="hljs-built_in">config</span> credential.helper store
+</code></pre><h4 id="push-wordpress-from-your-vps-to-git-repo-your">Push WordPress from your VPS to git repo your</h4>
+<p>Make sur file .gitignore doesn&#39;t contain app/config or other name that would be needed for your website to work.</p>
+<p>Make a bash script to backup db and push everything to git</p>
+<pre><code><span class="hljs-comment"># content of push.sh</span>
+mysqldump mitwy &gt; mitwy.sql
+git <span class="hljs-keyword">add</span><span class="bash"> --all .
+</span>git commit -am <span class="hljs-string">"backup"</span>
+git push origin master
+</code></pre><p>Make crone job to run script every day, push to git</p>
+<pre><code>crontab -<span class="hljs-built_in">e</span>
+
+# Add at the end of the <span class="hljs-keyword">file</span> to <span class="hljs-keyword">run</span> every day at midnight 
+0 0 * * * <span class="hljs-keyword">cd</span> /<span class="hljs-keyword">var</span>/www/mitwy &amp;&amp; <span class="hljs-keyword">sh</span> /<span class="hljs-keyword">var</span>/www/mitwy/push.<span class="hljs-keyword">sh</span>
+</code></pre><h4 id="pull-git-from-your-local-raspi">Pull git from your local RasPi</h4>
+<p>Pull data from git repo and copy it in Storage disk with a new folder called by date.</p>
+<p>Make sure python is installed with git package</p>
+<pre><code>sudo apt <span class="hljs-keyword">update</span>
+
+sudo apt <span class="hljs-keyword">install</span> python-pip
+sudo apt <span class="hljs-keyword">install</span> python3-pip
+
+pip <span class="hljs-keyword">install</span> gitpython
+pip3 <span class="hljs-keyword">install</span> gitpython
+</code></pre><p>Script tested in <strong>python 2.7</strong> to pull data from git and create backup.</p>
+<pre><code><span class="hljs-keyword">import</span> git
+<span class="hljs-keyword">import</span> shutil
+<span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">import</span> time
+
+print(<span class="hljs-string">'Pull start'</span>)
+
+max_dir = <span class="hljs-number">3</span>
+storage_path = <span class="hljs-string">"/mnt/storage/Mitwy/shop-backup/"</span>
+
+<span class="hljs-comment"># Pull from git</span>
+repo = git.Repo(<span class="hljs-string">'./'</span>)
+current = repo.head.commit
+repo.remotes.origin.pull()
+
+<span class="hljs-keyword">if</span> current != repo.head.commit:
+    print(<span class="hljs-string">"It changed"</span>)
+<span class="hljs-keyword">else</span>:
+    print(<span class="hljs-string">"Up to date"</span>)
+
+<span class="hljs-comment"># Move directory to storage</span>
+dst = storage_path + time.strftime(<span class="hljs-string">"/%Y%m%d"</span>)
+shutil.copytree(<span class="hljs-string">"./"</span>,dst)
+
+<span class="hljs-comment"># If more than x clean oldests</span>
+bcDirs = os.listdir(storage_path)
+bcDirs = sorted(bcDirs)
+
+i = <span class="hljs-number">0</span>
+<span class="hljs-keyword">for</span> bcDir <span class="hljs-keyword">in</span> reversed(bcDirs):
+    <span class="hljs-keyword">if</span> i &gt;= max_dir:
+        dir_path = storage_path + bcDir
+        <span class="hljs-keyword">try</span>:
+            shutil.rmtree(dir_path)
+        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+            print(<span class="hljs-string">"Error: %s : %s"</span> % (dir_path, e.strerror))
+    i=i+<span class="hljs-number">1</span>;
+
+print(<span class="hljs-string">'Pull end'</span>)
+</code></pre><p> The script is then run in crone task daily</p>
+<pre><code>crontab -e
+
+<span class="hljs-comment"># Add at the end of the file to run every day at 1 after midnight </span>
+<span class="hljs-number">0</span> <span class="hljs-number">1</span> * * * cd <span class="hljs-regexp">/var/</span>www<span class="hljs-regexp">/mitwy &amp;&amp; python /</span>var<span class="hljs-regexp">/www/mi</span>twy<span class="hljs-regexp">/pull.py</span>
+</code></pre><h4 id="load-backup">Load backup</h4>
+<p>Create directory for backup on RasPi</p>
+<pre><code># <span class="hljs-keyword">create</span> directori <span class="hljs-keyword">for</span> backup
+mkdir /<span class="hljs-keyword">var</span>/www/mitwy-backup
+chmod a+xwr /<span class="hljs-keyword">var</span>/www/mitwy-backup
+# <span class="hljs-keyword">create</span> <span class="hljs-keyword">index</span>.html file <span class="hljs-keyword">for</span> testing
+vim /<span class="hljs-keyword">var</span>/www/mitwy-backup/<span class="hljs-keyword">index</span>.html
+Hello Backup
+</code></pre><p>Create virtual host</p>
+<pre><code>vim <span class="hljs-regexp">/etc/</span>apache2<span class="hljs-regexp">/sites-available/mi</span>twy-backup.conf
+</code></pre><p>insert into file</p>
+<pre><code><span class="hljs-section">&lt;VirtualHost *:9080&gt;</span>
+        <span class="hljs-attribute">ServerAdmin</span> webmaster@localhost
+        <span class="hljs-attribute"><span class="hljs-nomarkup">DocumentRoot</span></span> /var/www/mitwy-backup
+
+<span class="hljs-section">&lt;Directory /var/www/mitwy&gt;</span>
+        <span class="hljs-attribute"><span class="hljs-nomarkup">Options</span></span> Indexes FollowSymLinks MultiViews
+        <span class="hljs-attribute">AllowOverride</span> <span class="hljs-literal">All</span>
+        <span class="hljs-attribute"><span class="hljs-nomarkup">Order</span></span> allow,deny
+        <span class="hljs-attribute"><span class="hljs-nomarkup">Allow</span></span> from <span class="hljs-literal">all</span>
+<span class="hljs-section">&lt;/Directory&gt;</span>
+
+        <span class="hljs-attribute">ErrorLog</span> <span class="hljs-variable">${APACHE_LOG_DIR}</span>/error.log
+        <span class="hljs-attribute">CustomLog</span> <span class="hljs-variable">${APACHE_LOG_DIR}</span>/access.log combined
+<span class="hljs-section">&lt;/VirtualHost&gt;</span>
+</code></pre><p>Update port listen for Apache</p>
+<pre><code><span class="hljs-keyword">vim</span> /etc/apache2/ports.<span class="hljs-keyword">conf</span>
+</code></pre><p>Add line (under Listen 80)</p>
+<pre><code><span class="hljs-attribute"><span class="hljs-nomarkup">Listen</span></span> 9080
+</code></pre><p>Enable rewrite with apache (otherwise permalinks pages may raise 404)</p>
+<pre><code>a2enmod <span class="hljs-built_in">rewrite</span>
+</code></pre><p>Restart apache2</p>
+<pre><code><span class="hljs-attribute">systemctl</span> reload apache2
+</code></pre><p>Validate your backup website access in browser with &quot;<ip>:9080&quot;</p>
+<p>Create Database</p>
+<pre><code># <span class="hljs-keyword">if</span> file present <span class="hljs-keyword">in</span> backup forlder (wsa there <span class="hljs-keyword">for</span> testing)
+rm <span class="hljs-keyword">index</span>.html
+
+# <span class="hljs-keyword">create</span> db, user <span class="hljs-keyword">and</span> access right <span class="hljs-keyword">to</span> db
+MariaDB&gt; GRANT ALL <span class="hljs-keyword">ON</span> nextclouddb.* <span class="hljs-keyword">TO</span> <span class="hljs-string">'nextcloud_user'</span>@<span class="hljs-string">'localhost'</span> IDENTIFIED <span class="hljs-keyword">BY</span> <span class="hljs-string">'example-password'</span>;
+MariaDB&gt; FLUSH PRIVILEGES;
+MariaDB&gt; <span class="hljs-keyword">EXIT</span>;
+</code></pre><p>Run load backup script tested in <strong>python3</strong></p>
+<pre><code><span class="hljs-attr">url_old</span> = <span class="hljs-string">"https://www.mitwy.com"</span>
+<span class="hljs-attr">url_new</span> = <span class="hljs-string">"http://192.168.1.28:9080"</span>
+<span class="hljs-attr">backup_dir</span> = <span class="hljs-string">"/mnt/storage/Mitwy/shop-backup/20210630"</span>
+<span class="hljs-attr">restor_dir</span> = <span class="hljs-string">"/var/www/mitwy-backup"</span>
+<span class="hljs-attr">sql_db</span> = <span class="hljs-string">"mitwy"</span>
+<span class="hljs-attr">sql_user</span> = <span class="hljs-string">""</span>
+<span class="hljs-attr">sql_psw</span> = <span class="hljs-string">""</span>
+
+<span class="hljs-comment"># Move files from backup directory to restor directory</span>
+os.system(<span class="hljs-string">"cp -R "</span>+backup_dir+<span class="hljs-string">"/* "</span>+restor_dir+<span class="hljs-string">"/"</span>)
+print(<span class="hljs-string">"Moved files"</span>)
+
+
+<span class="hljs-comment"># Restor mysql</span>
+os.system(<span class="hljs-string">"mysql "</span>+sql_db+<span class="hljs-string">" &lt; "</span>+restor_dir+<span class="hljs-string">"/"</span>+sql_db+<span class="hljs-string">".sql"</span>)
+print(<span class="hljs-string">"Restored DB"</span>)
+
+
+<span class="hljs-comment"># Change site URL in db</span>
+<span class="hljs-attr">mydb</span> = mysql.connector.connect(
+  <span class="hljs-attr">host="localhost",</span>
+  <span class="hljs-attr">user=sql_user,</span>
+  <span class="hljs-attr">password=sql_psw,</span>
+  <span class="hljs-attr">database=sql_db</span>
+)
+
+<span class="hljs-attr">mycursor</span> = mydb.cursor()
+
+<span class="hljs-attr">cmd</span> = <span class="hljs-string">"UPDATE wp_options SET option_value = replace(option_value, '"</span>+url_old+<span class="hljs-string">"', '"</span>+url_new+<span class="hljs-string">"') WHERE option_name = 'home' OR option_name = 'siteurl'"</span>
+print(cmd)
+mycursor.execute(cmd)
+mycursor.execute(<span class="hljs-string">"UPDATE wp_posts SET guid = replace(guid,'"</span>+url_old+<span class="hljs-string">"','"</span>+url_new+<span class="hljs-string">"')"</span>)
+mycursor.execute(<span class="hljs-string">"UPDATE wp_posts SET post_content = replace(post_content, '"</span>+url_old+<span class="hljs-string">"', '"</span>+url_new+<span class="hljs-string">"');"</span>)
+mycursor.execute(<span class="hljs-string">"UPDATE wp_postmeta SET meta_value = replace(meta_value,'"</span>+url_old+<span class="hljs-string">"','"</span>+url_new+<span class="hljs-string">"')"</span>)
+mycursor.execute(<span class="hljs-string">"UPDATE wp_links SET link_url = replace(link_url, '"</span>+url_old+<span class="hljs-string">"','"</span>+url_new+<span class="hljs-string">"')"</span>)
+mycursor.execute(<span class="hljs-string">"UPDATE wp_comments SET comment_content = replace(comment_content , '"</span>+url_old+<span class="hljs-string">"','"</span>+url_new+<span class="hljs-string">"')"</span>)
+mycursor.execute(<span class="hljs-string">"UPDATE wp_links SET link_image = replace(link_image, '"</span>+url_old+<span class="hljs-string">"','"</span>+url_new+<span class="hljs-string">"')"</span>)
+mydb.commit()
+
+print(<span class="hljs-string">"URL changed"</span>)
+</code></pre><p>If can not see WordPress try debug enable in wp-config, define( &#39;WP_DEBUG&#39;, true );</p>
+<p>If still issue 404 with pages, add .htaccess to WordPress directory if not present</p>
+<pre><code><span class="hljs-comment"># BEGIN WordPress</span>
+<span class="hljs-section">&lt;IfModule mod_rewrite.c&gt;</span>
+<span class="hljs-attribute"><span class="hljs-nomarkup">RewriteEngine</span></span> <span class="hljs-literal">On</span>
+<span class="hljs-attribute"><span class="hljs-nomarkup">RewriteRule</span></span> .* -<span class="hljs-meta"> [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]</span>
+<span class="hljs-attribute">RewriteBase</span> /
+<span class="hljs-attribute"><span class="hljs-nomarkup">RewriteRule</span></span> ^index\.php$ -<span class="hljs-meta"> [L]</span>
+<span class="hljs-attribute"><span class="hljs-nomarkup">RewriteCond</span></span> <span class="hljs-variable">%{REQUEST_FILENAME}</span> !-f
+<span class="hljs-attribute"><span class="hljs-nomarkup">RewriteCond</span></span> <span class="hljs-variable">%{REQUEST_FILENAME}</span> !-d
+<span class="hljs-attribute"><span class="hljs-nomarkup">RewriteRule</span></span> . /index.php<span class="hljs-meta"> [L]</span>
+<span class="hljs-section">&lt;/IfModule&gt;</span>
+<span class="hljs-comment"># END WordPress</span>
+</code></pre>
+
+</body>
+</html>

@@ -1,0 +1,375 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>VPS Beginner</title>
+  <meta name="Mitwy" content="VPS Beginner">
+  <link rel="stylesheet" href="css/air.css">
+</head>
+
+<body>
+<h3 id="T0_P3">How to SSH from windows to linux using PUTTY with key | VPS Beginner | P3</h3>
+<p><strong>Enable insert in vim over ssh</strong></p>
+<pre><code><span class="hljs-keyword">vim</span> /usr/share/<span class="hljs-keyword">vim</span>/vim81/defaults.<span class="hljs-keyword">vim</span>
+<span class="hljs-comment">" In many terminal emulators the mouse works just fine.  By enabling it you</span>
+<span class="hljs-comment">" can position the cursor, Visually select and scroll with the mouse.</span>
+<span class="hljs-comment">"if has('mouse')</span>
+<span class="hljs-comment">"  set mouse=r</span>
+</code></pre><p><strong>Create User</strong></p>
+<pre><code>adduser <span class="hljs-params">&lt;userName&gt;</span>
+passwd <span class="hljs-params">&lt;userName&gt;</span>
+<span class="hljs-params">&lt;psw&gt;</span> 
+chsh -s <span class="hljs-meta-keyword">/bin/</span>bash <span class="hljs-params">&lt;userName&gt;</span>
+</code></pre><p><strong>add user to sudo</strong></p>
+<pre><code>usermod -aG sudo <span class="hljs-tag">&lt;<span class="hljs-name">userName</span>&gt;</span>
+</code></pre><p><strong>Create directory and set up public key</strong></p>
+<pre><code>mkdir -<span class="hljs-selector-tag">p</span> ~/<span class="hljs-selector-class">.ssh</span>
+cd ~/<span class="hljs-selector-class">.ssh</span>
+vim ~/.ssh/authorized_keys
+chmod <span class="hljs-number">644</span> ~/.ssh/authorized_keys
+chmod <span class="hljs-number">700</span> ~/<span class="hljs-selector-class">.ssh</span>
+chown &lt;userName&gt;:&lt;userName&gt; ~/.ssh/authorized_keys
+</code></pre><p><strong>Force ssh key authentification</strong></p>
+<pre><code><span class="hljs-keyword">vim</span> /etc/ssh/sshd_config
+# Change <span class="hljs-keyword">to</span> <span class="hljs-keyword">no</span> <span class="hljs-keyword">to</span> disable tunnelled clear text passwords
+PasswordAuthentication <span class="hljs-keyword">no</span>
+</code></pre><p><strong>upload files</strong></p>
+<pre><code>path=%path%;<span class="hljs-string">C:</span>\Program Files (x86)\PuTTY
+pscp -P <span class="hljs-number">22</span> -r File_To_Upload_Path User_login<span class="hljs-meta">@Ip</span><span class="hljs-string">_server:</span>Path_On_Server
+TIMEOUT <span class="hljs-number">50</span>
+</code></pre>
+</code></pre>
+
+
+<h3 id="T0_P5">LAMP and how to install it on linux debian 10 | VPS Beginner | P5</h3>
+<p><strong>Log to VPS using putty and your SSH key</strong></p>
+<p>log in as admin</p>
+<pre><code><span class="hljs-attribute">sudo su</span>
+</code></pre><p><strong>Update/Upgrade</strong></p>
+<pre><code>apt <span class="hljs-keyword">update</span>
+apt <span class="hljs-keyword">upgrade</span>
+</code></pre><p><strong>Install apache</strong></p>
+<pre><code>apt <span class="hljs-keyword">install</span> apache2
+</code></pre><p><strong>install maria db</strong></p>
+<pre><code>apt <span class="hljs-keyword">install</span> mariadb-<span class="hljs-keyword">server</span>
+</code></pre><p><strong>remove unsecure access</strong></p>
+<pre><code>mysql_secure_installation
+</code></pre><p><strong>log into Maria DB and check version</strong></p>
+<pre><code><span class="hljs-attribute">mysql -u root -p</span>
+</code></pre><p><strong>install php</strong></p>
+<pre><code>apt <span class="hljs-keyword">install</span> php libapache2-<span class="hljs-keyword">mod</span>-php php-mysql
+</code></pre><p><strong>check php version</strong></p>
+<pre><code><span class="hljs-attribute">php -v</span>
+</code></pre><p><strong>enable php for apache2 (should be already enabled)</strong></p>
+<pre><code><span class="hljs-selector-tag">a2enmod</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3</span>
+</code></pre><p><strong>restart apache2</strong></p>
+<pre><code>systemctl <span class="hljs-built_in">restart</span> apache2
+</code></pre>
+
+<h3 id="T0_P6">How to host multiple websites and services with Apache | VPS Beginner | P6</h3>
+<p>You need to have the domains/subdomains already created on your DNS provider. For this tutorial I have the following subdomains:</p>
+<ul>
+<li>cloud.mitwy.com</li>
+<li>git.mitwy.com</li>
+<li>chat.mitwy.com</li>
+<li>shop.mitwy.com</li>
+</ul>
+<p>The LAMP stack should be installed, if not please check &quot;LAMP and how to install it on Linux Debian&quot;.</p>
+<p><strong>Log to VPS using putty and your SSH key</strong>
+Log in as admin</p>
+<pre><code><span class="hljs-attribute">sudo su</span>
+</code></pre><p><strong>Create directories for the subdomains</strong>
+Move to /var/www</p>
+<pre><code><span class="hljs-keyword">cd</span> /<span class="hljs-keyword">var</span>/www
+</code></pre><p>Create directories</p>
+<pre><code><span class="hljs-built_in">mkdir</span> cloud
+<span class="hljs-built_in">mkdir</span> git
+<span class="hljs-built_in">mkdir</span> chat
+<span class="hljs-built_in">mkdir</span> shop
+</code></pre><p><strong>Create index.html/index.php files in each directories of each subdomain</strong>
+For subdomain chat.mitwy.com, move to folder /var/www/chat</p>
+<pre><code><span class="hljs-keyword">cd</span> /<span class="hljs-keyword">var</span>/www/chat
+</code></pre><p>Create and open file index.php</p>
+<pre><code><span class="hljs-keyword">vim</span> <span class="hljs-built_in">index</span>.php
+</code></pre><p>click &quot;INSERT&quot; and add to the file</p>
+<pre><code><span class="php"><span class="hljs-meta">&lt;?php</span> phpinfo(); <span class="hljs-meta">?&gt;</span></span>
+</code></pre><p>Click &quot;ESC&quot;, type &quot;:wq&quot;, type enter (:wq to save and exit)</p>
+<p>Do the same for every subdomains. With different content in the file &quot;index.php&quot;.
+<strong>Create virual hosts</strong>
+move to apache sites-enabled</p>
+<pre><code>cd <span class="hljs-regexp">/etc/</span>apache2<span class="hljs-regexp">/sites-enabled</span>
+</code></pre><p>copy default vhost </p>
+<pre><code><span class="hljs-keyword">cp</span> <span class="hljs-number">000</span>-default.<span class="hljs-keyword">conf</span> chat.<span class="hljs-keyword">conf</span>
+</code></pre><p>open file chat.php</p>
+<pre><code><span class="hljs-selector-tag">vim</span> <span class="hljs-selector-tag">chat</span><span class="hljs-selector-class">.php</span>
+</code></pre><p>click &quot;INSERT&quot;
+change DocumentRoot path to subdomain directorie &quot;/var/www/chat&quot;
+change ServerName to one of your subdomain, for this exmaple I will use &quot;chat.mitwy.com&quot;
+click &quot;ESC&quot;, type &quot;:wq&quot;, type enter (:wq to save and exit)
+enable host for apache</p>
+<pre><code><span class="hljs-selector-tag">a2ensite</span> <span class="hljs-selector-tag">chat</span><span class="hljs-selector-class">.conf</span>
+</code></pre><p>reload apache</p>
+<pre><code><span class="hljs-attribute">systemctl</span> reload apache2
+</code></pre><p>At this point you should see php informaiton if you type in your browser your subdomain.</p>
+<p>Now create virtual hosts  and enable them for all other subdomains.</p>
+
+
+<h3 id="T0_P7">How to get a free SSL certificate with let&#39;s encrypt | VPS Beginner | P7</h3>
+<p><strong>Log to VPS using putty and your SSH key</strong></p>
+<p>log in as admin</p>
+<pre><code><span class="hljs-attribute">sudo su</span>
+</code></pre><p><strong>Install snap and cerbot</strong></p>
+<p>You can find how to install it on <a href="https://certbot.eff.org/">https://certbot.eff.org/</a>.</p>
+<p>For Debian 10 and Apache.</p>
+<p>Install snap.</p>
+<pre><code>apt <span class="hljs-keyword">install</span> snap
+</code></pre><p>Make sure snap is the latest version</p>
+<pre><code>snap <span class="hljs-keyword">install </span>core<span class="hljs-comment">; sudo snap refresh core</span>
+</code></pre><p>Install cerbot</p>
+<pre><code>snap <span class="hljs-keyword">install</span> <span class="hljs-comment">--classic certbot</span>
+</code></pre><p>Prepare the Cerbot command</p>
+<pre><code>sudo ln -s <span class="hljs-regexp">/snap/</span>bin<span class="hljs-regexp">/certbot /u</span>sr<span class="hljs-regexp">/bin/</span>certbot
+</code></pre><p>Set cerbot to run with apache</p>
+<pre><code>certbot <span class="hljs-comment">--apache</span>
+</code></pre><p>You will be asked for your e-mail address. It will send you an e-mail if you need to renew your certificate.</p>
+<p>You can then choose the domain for which you would like to activate HTTPS.</p>
+
+
+<h3 id="T0_P8">Install your personal cloud with NextCloud on Debian 10 | VPS Beginner | P8</h3>
+<p>Login as admin</p>
+<pre><code><span class="hljs-attribute">sudo su</span>
+</code></pre><h4 id="1-update-upgrade">1. Update/Upgrade</h4>
+<p>Update list of packages</p>
+<pre><code><span class="hljs-attribute">apt update</span>
+</code></pre><p>Install packages</p>
+<pre><code><span class="hljs-attribute">apt upgrade</span>
+</code></pre><h4 id="2-install-apache">2. Install Apache</h4>
+<p>Install apache with php module</p>
+<pre><code>apt <span class="hljs-keyword">install</span> apache2 libapache2-<span class="hljs-keyword">mod</span>-php -y
+</code></pre><p>Start apache and enable it at boot</p>
+<pre><code>systemctl <span class="hljs-keyword">start</span> apache2
+systemctl <span class="hljs-keyword">enable</span> apache2
+</code></pre><h4 id="3-install-mariadb">3. Install MariaDb</h4>
+<p>Make sur MariaDb is installed</p>
+<pre><code>apt <span class="hljs-keyword">install</span> mariadb-<span class="hljs-keyword">server</span> php-mysql -y
+</code></pre><p>If not done run security wizard</p>
+<pre><code>mysql_secure_installation
+</code></pre><p>Answer questions with your own password</p>
+<pre><code>Enter current password for root (enter for none): Enter
+<span class="hljs-keyword">Set</span> root <span class="hljs-keyword">password</span>? [Y/n]: Y
+<span class="hljs-keyword">New</span> <span class="hljs-keyword">password</span>: &lt;your <span class="hljs-keyword">password</span>&gt;
+Re-enter <span class="hljs-keyword">new</span> <span class="hljs-keyword">password</span>: &lt;your <span class="hljs-keyword">password</span>&gt;
+Remove anonymous <span class="hljs-keyword">users</span>? [Y/n]: Y
+<span class="hljs-keyword">Disallow</span> root login remotely? [Y/n]: Y
+Remove <span class="hljs-keyword">test</span> <span class="hljs-keyword">database</span> <span class="hljs-keyword">and</span> <span class="hljs-keyword">access</span> <span class="hljs-keyword">to</span> it? [Y/n]: Y
+Reload privilege <span class="hljs-keyword">tables</span> <span class="hljs-keyword">now</span>? [Y/n]: Y
+</code></pre><h4 id="4-install-php">4. Install php</h4>
+<p>Install php with extensions</p>
+<pre><code><span class="hljs-selector-tag">apt</span> <span class="hljs-selector-tag">install</span> <span class="hljs-selector-tag">php</span> <span class="hljs-selector-tag">php-gd</span> <span class="hljs-selector-tag">php-mbstring</span> <span class="hljs-selector-tag">php-dom</span> <span class="hljs-selector-tag">php-curl</span> <span class="hljs-selector-tag">php-zip</span> <span class="hljs-selector-tag">php-simplexml</span> <span class="hljs-selector-tag">php-xml</span> <span class="hljs-selector-tag">-y</span>
+<span class="hljs-selector-tag">apt</span> <span class="hljs-selector-tag">install</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3-fpm</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3-gd</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3-mysql</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3-curl</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3-xml</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3-zip</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3-intl</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3-mbstring</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3-bz2</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3-json</span> <span class="hljs-selector-tag">php-apcu</span>
+</code></pre><h4 id="5-nextcloud-files-to-directory">5. NextCloud files to directory</h4>
+<p>Find out latest nextcloud version (at the moment 20.0.4) at <a href="https://nextcloud.com/install/#instructions-server">https://nextcloud.com/install/#instructions-server</a> and download it with</p>
+<pre><code>wget http<span class="hljs-variable">s:</span>//download.nextcloud.<span class="hljs-keyword">com</span>/server/releases/nextcloud-<span class="hljs-symbol">&lt;version&gt;</span>.tar.bz2
+</code></pre><p>The file is compressed, decompress it to cloud directory</p>
+<pre><code>tar -xjf nextcloud-<span class="hljs-number">18.0</span>.<span class="hljs-number">4</span><span class="hljs-selector-class">.tar</span><span class="hljs-selector-class">.bz2</span> -C /var/www/cloud
+</code></pre><p>Make apache owner and give access rights to folder 755 (read and execute access for everyone and also write access for the owner of the file)</p>
+<pre><code>chown -R www-<span class="hljs-keyword">data</span>:www-<span class="hljs-keyword">data</span> /<span class="hljs-keyword">var</span>/www/cloud
+chmod -R <span class="hljs-number">755</span> /<span class="hljs-keyword">var</span>/www/cloud
+</code></pre><h4 id="6-create-a-database-for-nextcloud">6. Create a database for NextCloud</h4>
+<p>Sign in to MySql with your root password if you have set one</p>
+<pre><code><span class="hljs-attribute">mysql -u root -p</span>
+</code></pre><p>Create a database for NextCloud</p>
+<pre><code>MariaDB&gt; CREATE DATABASE cloud<span class="hljs-comment">;</span>
+</code></pre><p>Create a user with access rights to the database</p>
+<pre><code>MariaDB&gt; GRANT <span class="hljs-literal">ALL</span> <span class="hljs-keyword">ON</span> nextclouddb.* <span class="hljs-keyword">TO</span> <span class="hljs-string">'nextcloud_user'</span>@<span class="hljs-string">'localhost'</span> IDENTIFIED <span class="hljs-keyword">BY</span> <span class="hljs-string">'example-password'</span>;
+MariaDB&gt; FLUSH PRIVILEGES;
+MariaDB&gt; EXIT;
+</code></pre><h4 id="7-install-nextcloud">7. Install NextCloud</h4>
+<p>Connect to the URL of your cloud and install it through your browser.</p>
+
+
+<h3 id="T0_P9">Install your free online store with WooCommerce  on Wordpress | VPS Beginner | P9</h3>
+<p>Login as admin</p>
+<pre><code><span class="hljs-attribute">sudo su</span>
+</code></pre><h4 id="1-update-upgrade">1. Update/Upgrade</h4>
+<p>Update list of packages</p>
+<pre><code><span class="hljs-attribute">apt update</span>
+</code></pre><p>Install packages</p>
+<pre><code><span class="hljs-attribute">apt upgrade</span>
+</code></pre><h4 id="2-install-apache">2. Install Apache</h4>
+<p>Install apache with php module</p>
+<pre><code>apt <span class="hljs-keyword">install</span> apache2 libapache2-<span class="hljs-keyword">mod</span>-php -y
+</code></pre><p>Start apache and enable it at boot</p>
+<pre><code>systemctl <span class="hljs-keyword">start</span> apache2
+systemctl <span class="hljs-keyword">enable</span> apache2
+</code></pre><h4 id="3-install-mariadb">3. Install MariaDb</h4>
+<p>Make sur MariaDb is installed</p>
+<pre><code>apt <span class="hljs-keyword">install</span> mariadb-<span class="hljs-keyword">server</span> php-mysql -y
+</code></pre><p>If not done run security wizard</p>
+<pre><code>mysql_secure_installation
+</code></pre><p>Answer questions with your own password</p>
+<pre><code>Enter current password for root (enter for none): Enter
+<span class="hljs-keyword">Set</span> root <span class="hljs-keyword">password</span>? [Y/n]: Y
+<span class="hljs-keyword">New</span> <span class="hljs-keyword">password</span>: &lt;your <span class="hljs-keyword">password</span>&gt;
+Re-enter <span class="hljs-keyword">new</span> <span class="hljs-keyword">password</span>: &lt;your <span class="hljs-keyword">password</span>&gt;
+Remove anonymous <span class="hljs-keyword">users</span>? [Y/n]: Y
+<span class="hljs-keyword">Disallow</span> root login remotely? [Y/n]: Y
+Remove <span class="hljs-keyword">test</span> <span class="hljs-keyword">database</span> <span class="hljs-keyword">and</span> <span class="hljs-keyword">access</span> <span class="hljs-keyword">to</span> it? [Y/n]: Y
+Reload privilege <span class="hljs-keyword">tables</span> <span class="hljs-keyword">now</span>? [Y/n]: Y
+</code></pre><h4 id="4-install-php">4. Install php</h4>
+<p>Install php with extensions</p>
+<pre><code><span class="hljs-selector-tag">apt</span> <span class="hljs-selector-tag">install</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3-curl</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3-gd</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3-mbstring</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3-xml</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3-xmlrpc</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3-soap</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3-intl</span> <span class="hljs-selector-tag">php7</span><span class="hljs-selector-class">.3-zip</span>
+</code></pre><h4 id="5-download-wordpress">5. Download WordPress</h4>
+<pre><code>
+wget <span class="hljs-string">https:</span><span class="hljs-comment">//wordpress.org/latest.tar.gz</span>
+</code></pre><p>The file is compressed, decompress it to cloud directory</p>
+<pre><code>tar xzvf latest<span class="hljs-selector-class">.tar</span><span class="hljs-selector-class">.gz</span>
+</code></pre><p>Make apache owner and give access rights to folder 755 (read and execute access for everyone and also write access for the owner of the file)</p>
+<pre><code>chown -R www-<span class="hljs-keyword">data</span>:www-<span class="hljs-keyword">data</span> /<span class="hljs-keyword">var</span>/www/shop
+chmod -R <span class="hljs-number">755</span> /<span class="hljs-keyword">var</span>/www/shop
+</code></pre><h4 id="6-create-a-database-for-wordpress">6. Create a database for WordPress</h4>
+<p>Sign in to MySql with your root password if you have set one</p>
+<pre><code><span class="hljs-attribute">mysql -u root -p</span>
+</code></pre><p>Create a database for WordPress</p>
+<pre><code>MariaDB&gt; CREATE DATABASE wp_db<span class="hljs-comment">;</span>
+</code></pre><p>Create a user with access rights to the database</p>
+<pre><code>MariaDB&gt; GRANT <span class="hljs-literal">ALL</span> <span class="hljs-keyword">ON</span> wp_db.* <span class="hljs-keyword">TO</span> <span class="hljs-string">'wp_db_user'</span>@<span class="hljs-string">'localhost'</span> IDENTIFIED <span class="hljs-keyword">BY</span> <span class="hljs-string">'example-password'</span>;
+MariaDB&gt; FLUSH PRIVILEGES;
+MariaDB&gt; EXIT;
+</code></pre><h4 id="7-generate-salts">7. Generate salts</h4>
+<p>Generate unique salts (used to encrypte data)</p>
+<pre><code>curl -s https:<span class="hljs-regexp">//</span>api.wordpress.org<span class="hljs-regexp">/secret-key/</span><span class="hljs-number">1.1</span><span class="hljs-regexp">/salt/</span>
+<span class="hljs-comment"># past salt in/var/www/wordpress/wp-config.php</span>
+vim <span class="hljs-regexp">/var/</span>www<span class="hljs-regexp">/wordpress/</span>wp-config.php
+<span class="hljs-comment"># also add DB_NAME, DB_USER and DB_PASSWORD</span>
+</code></pre><h4 id="8-install-wordpress">8. Install WordPress</h4>
+<p>Connect to the URL of your shop and install it through your browser.</p>
+<h4 id="9-install-woocommerce">9. Install Woocommerce</h4>
+<p>WordPress Dashboard and go to: Plugins &gt; Add New.</p>
+
+
+
+
+<h3 id="T0_P10">Install Gogs your own git server on Debian 10 | VPS Beginner | P10</h3>
+<p>Login as admin</p>
+<pre><code><span class="hljs-attribute">sudo su</span>
+</code></pre><h4 id="1-update-upgrade">1. Update/Upgrade</h4>
+<p>Update list of packages</p>
+<pre><code><span class="hljs-attribute">apt update</span>
+</code></pre><p>Install packages</p>
+<pre><code><span class="hljs-attribute">apt upgrade</span>
+</code></pre><h4 id="2-install-apache">2. Install Apache</h4>
+<p>Install apache with php module</p>
+<pre><code>apt <span class="hljs-keyword">install</span> apache2 libapache2-<span class="hljs-keyword">mod</span>-php -y
+</code></pre><p>Start apache and enable it at boot</p>
+<pre><code>systemctl <span class="hljs-keyword">start</span> apache2
+systemctl <span class="hljs-keyword">enable</span> apache2
+</code></pre><h4 id="3-install-mariadb">3. Install MariaDb</h4>
+<p>Make sur MariaDb is installed</p>
+<pre><code>apt <span class="hljs-keyword">install</span> mariadb-<span class="hljs-keyword">server</span> php-mysql -y
+</code></pre><p>If not done run security wizard</p>
+<pre><code>mysql_secure_installation
+</code></pre><p>Answer questions with your own password</p>
+<pre><code>Enter current password for root (enter for none): Enter
+<span class="hljs-keyword">Set</span> root <span class="hljs-keyword">password</span>? [Y/n]: Y
+<span class="hljs-keyword">New</span> <span class="hljs-keyword">password</span>: &lt;your <span class="hljs-keyword">password</span>&gt;
+Re-enter <span class="hljs-keyword">new</span> <span class="hljs-keyword">password</span>: &lt;your <span class="hljs-keyword">password</span>&gt;
+Remove anonymous <span class="hljs-keyword">users</span>? [Y/n]: Y
+<span class="hljs-keyword">Disallow</span> root login remotely? [Y/n]: Y
+Remove <span class="hljs-keyword">test</span> <span class="hljs-keyword">database</span> <span class="hljs-keyword">and</span> <span class="hljs-keyword">access</span> <span class="hljs-keyword">to</span> it? [Y/n]: Y
+Reload privilege <span class="hljs-keyword">tables</span> <span class="hljs-keyword">now</span>? [Y/n]: Y
+</code></pre><h4 id="4-install-git">4. Install git</h4>
+<pre><code>apt-<span class="hljs-keyword">get</span> install git
+</code></pre><h4 id="5-download-latest-release-of-gogs">5. Download latest release of Gogs</h4>
+<p>Check version at <a href="https://gogs.io/docs/installation/install_from_binary">https://gogs.io/docs/installation/install_from_binary</a></p>
+<pre><code><span class="hljs-meta"># move to git folder</span>
+cd /<span class="hljs-keyword">var</span>/www/git
+<span class="hljs-meta"># download file</span>
+wget https:<span class="hljs-comment">//dl.gogs.io/0.12.3/gogs_0.12.3_linux_amd64.tar.gz</span>
+</code></pre><p>The file is compressed, decompress it with</p>
+<pre><code>tar xzvf latest<span class="hljs-selector-class">.tar</span><span class="hljs-selector-class">.gz</span>
+</code></pre><h4 id="6-update-vhost">6. Update vhost</h4>
+<p>Add reversee proxy to /etc/apache/sites-enable/git.conf (or your vhost for your gogs)</p>
+<pre><code>ProxyPreserveHost On
+ProxyRequests off
+ProxyPass <span class="hljs-regexp">/ http:/</span><span class="hljs-regexp">/127.0.0.1:3000/</span>
+ProxyPassReverse <span class="hljs-regexp">/ http:/</span><span class="hljs-regexp">/127.0.0.1:3000/</span>
+</code></pre><p>And remove DocumentRoot</p>
+<h4 id="7-enable-proxy-modes-for-apache">7. Enable proxy modes for Apache</h4>
+<p>Enable proxy modules for apache</p>
+<pre><code><span class="hljs-attribute">sudo</span> a2enmod proxy
+sudo a2enmod proxy_http
+sudo a2enmod proxy_balancer
+</code></pre><p>Restart apache</p>
+<pre><code>systemctl <span class="hljs-built_in">restart</span> apache2
+</code></pre><h4 id="8-change-gogs-configuration">8. Change Gogs configuration</h4>
+<p>Create directory and file</p>
+<pre><code>mkidr <span class="hljs-meta-keyword">/var/</span>www<span class="hljs-meta-keyword">/gogs/</span>custom
+mkidr <span class="hljs-meta-keyword">/var/</span>www<span class="hljs-meta-keyword">/gogs/</span>custom/conf
+vim custom<span class="hljs-meta-keyword">/conf/</span>app.ini
+</code></pre><p>Change configuration in custom/conf/app.ini </p>
+<pre><code><span class="hljs-section">[server]</span>
+<span class="hljs-attr">HTTP_ADDR</span>        = <span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>
+<span class="hljs-attr">EXTERNAL_URL</span>     = &lt;Put the url of your gogs service hear&gt;
+</code></pre><h4 id="-"> </h4>
+<h4 id="9-create-a-database-for-gogs">9. Create a database for Gogs</h4>
+<p>Sign in to MySql with your root password if you have set one</p>
+<pre><code><span class="hljs-attribute">mysql -u root -p</span>
+</code></pre><p>Create a database for Gogs</p>
+<pre><code>MariaDB&gt; CREATE DATABASE gogs<span class="hljs-comment">;</span>
+</code></pre><p>Create a user with access rights to the database</p>
+<pre><code>MariaDB&gt; GRANT <span class="hljs-literal">ALL</span> <span class="hljs-keyword">ON</span> gogs.* <span class="hljs-keyword">TO</span> <span class="hljs-string">'gogs_user'</span>@<span class="hljs-string">'localhost'</span> IDENTIFIED <span class="hljs-keyword">BY</span> <span class="hljs-string">'example-password'</span>;
+MariaDB&gt; FLUSH PRIVILEGES;
+MariaDB&gt; EXIT;
+</code></pre><h4 id="10-install-gogs">10. Install gogs</h4>
+<p>execute gogs with</p>
+<pre><code> <span class="hljs-keyword">var</span>/www/git/gogs web.
+</code></pre><p>The go in your browser to install gogs. Set database access and user that started &quot;var/www/git/gogs web.&quot;</p>
+<p>Make apache owner and give access rights to folder 755 (read and execute access for everyone and also write access for the owner of the file)</p>
+<pre><code>chown -R www-<span class="hljs-keyword">data</span>:www-<span class="hljs-keyword">data</span> /<span class="hljs-keyword">var</span>/www/gogs
+chmod -R <span class="hljs-number">755</span> /<span class="hljs-keyword">var</span>/www/gogs
+</code></pre><h4 id="11-set-https">11. Set https</h4>
+<p>Change configuration in custom/conf/app.ini for example</p>
+<pre><code>certbot <span class="hljs-comment">--apache</span>
+</code></pre><h4 id="12-create-systemctl-service-to-run-on-start">12. Create systemctl service to run on start</h4>
+<p>in</p>
+<pre><code>vim <span class="hljs-regexp">/etc/</span>systemd<span class="hljs-regexp">/system/g</span>ogs.service
+</code></pre><p>Past</p>
+<pre><code><span class="hljs-section">[Unit]</span>
+<span class="hljs-attr">Description</span>=Gogs
+<span class="hljs-attr">After</span>=syslog.target
+<span class="hljs-attr">After</span>=network.target
+<span class="hljs-attr">After</span>=mariadb.service mysqld.service postgresql.service memcached.service redis.service
+<span class="hljs-section">
+[Service]</span>
+<span class="hljs-comment"># Modify these two values and uncomment them if you have</span>
+<span class="hljs-comment"># repos with lots of files and get an HTTP error 500 because</span>
+<span class="hljs-comment"># of that</span>
+<span class="hljs-comment">###</span>
+<span class="hljs-comment">#LimitMEMLOCK=infinity</span>
+<span class="hljs-comment">#LimitNOFILE=65535</span>
+<span class="hljs-attr">Type</span>=simple
+<span class="hljs-attr">User</span>=root
+<span class="hljs-attr">Group</span>=sudo
+<span class="hljs-attr">WorkingDirectory</span>=/var/www/gogs
+<span class="hljs-attr">ExecStart</span>=/var/www/gogs/gogs web
+<span class="hljs-attr">Restart</span>=always
+<span class="hljs-attr">Environment</span>=USER=root HOME=/home
+
+<span class="hljs-comment"># Some distributions may not support these hardening directives. If you cannot start the service due</span>
+<span class="hljs-comment"># to an unknown option, comment out the ones not supported by your version of systemd.</span>
+<span class="hljs-attr">ProtectSystem</span>=full
+<span class="hljs-attr">PrivateDevices</span>=<span class="hljs-literal">yes</span>
+<span class="hljs-attr">PrivateTmp</span>=<span class="hljs-literal">yes</span>
+<span class="hljs-attr">NoNewPrivileges</span>=<span class="hljs-literal">true</span>
+<span class="hljs-section">
+[Install]</span>
+<span class="hljs-attr">WantedBy</span>=multi-user.target
+</code></pre><p>Enable service with </p>
+<pre><code>systemctl <span class="hljs-built_in">enable</span> gogs.service
+</code></pre><p>Start service with </p>
+<pre><code>systemctl <span class="hljs-literal">start</span> gogs.service
+</code></pre>
+
+
+</body>
+</html>
