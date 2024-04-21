@@ -1,3 +1,4 @@
+[![T0_P5](https://img.youtube.com/vi/-urt0Dxq1IU/0.jpg)](https://www.youtube.com/watch?v=-urt0Dxq1IU)
 ###  LAMP and how to install it on linux debian 10 | VPS Beginner | P5
 
 **Log to VPS using putty and your SSH key**
