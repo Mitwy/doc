@@ -1,3 +1,4 @@
+[![T0_P8](https://img.youtube.com/vi/wbfF2gI4b28/0.jpg)](https://www.youtube.com/watch?v=wbfF2gI4b28)
 ### Install your personal cloud with NextCloud on Debian 10 | VPS Beginner | P8
 
 Login as admin
