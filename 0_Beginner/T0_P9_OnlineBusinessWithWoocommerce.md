@@ -1,3 +1,4 @@
+[![T0_P9](https://img.youtube.com/vi/DwXasU4zNFs/0.jpg)](https://www.youtube.com/watch?v=DwXasU4zNFs)
 ### Install your free online store with Woocommerce on Wordpress | VPS Beginner | P9
 
 Login as admin
