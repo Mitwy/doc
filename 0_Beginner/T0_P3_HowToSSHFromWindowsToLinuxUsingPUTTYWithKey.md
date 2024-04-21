@@ -1,4 +1,4 @@
-
+[![T0_P3](https://img.youtube.com/vi/gCRiLKlUEa0/0.jpg)](https://www.youtube.com/watch?v=gCRiLKlUEa0)
 ###  How to SSH from windows to linux using PUTTY with key | VPS Beginner | P3
 **Enable insert in vim over ssh**
 
