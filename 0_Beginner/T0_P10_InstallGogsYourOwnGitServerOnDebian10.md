@@ -1,4 +1,4 @@
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/5ysGZoBJGVU/0.jpg)]([https://www.youtube.com/watch?v=5ysGZoBJGVU])
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/5ysGZoBJGVU/0.jpg)][https://www.youtube.com/watch?v=5ysGZoBJGVU]
 ### Install Gogs your own git server on Debian 10 | VPS Beginner | P10
 Login as admin
 ```
