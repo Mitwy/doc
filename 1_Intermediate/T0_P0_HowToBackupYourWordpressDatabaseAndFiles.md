@@ -1,3 +1,4 @@
+[![T0_P1](https://img.youtube.com/vi/SqjB4j_whxI/0.jpg)](https://www.youtube.com/watch?v=SqjB4j_whxI)
 ### How to backup your WordPress database and files | VPS Intermediate | P0
 
 Create new git user on Gogs for backups
