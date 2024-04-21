@@ -13,5 +13,7 @@
 
 [Install your free online store with WooCommerce on Wordpress | VPS Beginner | T0_P9](./0_Beginner/T0_P9_OnlineBusinessWithWoocommerce.md)
 
+[Install Gogs your own git server on Debian 10 | VPS Beginner | T0_P10](./0_Beginner/T0_P10_InstallGogsYourOwnGitServerOnDebian10.md)
+
 #### [VpsIntermediate](./1_Intermediate)
 [Backup your wordpress | VPS Beginner | T0_P0](./1_Intermediate/T0_P0_HowToBackupYourWordpressDatabaseAndFiles.md)
